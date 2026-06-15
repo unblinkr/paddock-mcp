@@ -22,11 +22,11 @@ Seven tools are live. Free tools require no authentication; paid tools accept a 
 | `get_best_value_provider` | $0.02 USDC / query | Ranks providers in one category by a composite of reliability (TrustBench 7-day success rate), reputation (unique buyers), and price. |
 | `get_liveness` | $0.001 USDC / query | Per-domain liveness lookup against TrustBench probe data: up/down (7-day success rate >= 0.95), score, latency p50/p95, and sample count. |
 | `get_changes` | $0.10 USDC / query | Diffs today's market snapshot against a past date (up to 90 days back): new services, retired services, category share movements, and top movers. |
-| `get_report_data` | Free metadata + $0.99 USDC / query for full data | Free metadata (title, table of contents, executive summary excerpt) at the unauthenticated `/api/mcp/report-data` route; full structured JSON of the monthly State of Agent Commerce report — ecosystem trends, category breakdowns, the Agent Commerce Index (ACI) with component decomposition, protocol comparison, and reliability data — via the x402-hardened `/paid` route. |
+| `get_report_data` | Free metadata + $0.99 USDC / query for full data | Free metadata (title, table of contents, executive summary excerpt) at the unauthenticated `/api/paddock/mcp/report-data` route; full structured JSON of the monthly State of Agent Commerce report — ecosystem trends, category breakdowns, the Agent Commerce Index (ACI) with component decomposition, protocol comparison, and reliability data — via the x402-hardened `/api/paddock/mcp/report-data/paid` route. |
 
 The paid tools (`get_niche_gaps`, `get_best_value_provider`, `get_liveness`, `get_changes`) each allow one free trial call per day per IP. `get_report_data` has no free trial on the full-data route; only its metadata is free.
 
-> `get_report_data` is published with two paths. The free-metadata route is declared with `security: []` and is deliberately excluded from x402scan indexing; the full-data route carries the x402 payment scheme. Both are visible in `openapi.json`.
+> `get_report_data` is published with two paths. The free-metadata route (`/api/paddock/mcp/report-data`) is declared with `security: []` and is deliberately excluded from x402scan indexing; the full-data route (`/api/paddock/mcp/report-data/paid`) carries the x402 payment scheme. Both are visible in `openapi.json`.
 
 ## Connecting from Claude Desktop
 
