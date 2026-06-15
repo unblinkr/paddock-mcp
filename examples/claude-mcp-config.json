@@ -1,0 +1,9 @@
+{
+  "_comment": "Add Paddock as a remote MCP connector in Claude Desktop. Merge the 'paddock' entry into the mcpServers block of your claude_desktop_config.json, then restart Claude Desktop. The Paddock MCP endpoint is a standard MCP HTTP transport; mcp-remote bridges it to Claude Desktop's stdio config. No API key is needed for the two free tools; paid tools prompt for payment or accept an API key.",
+  "mcpServers": {
+    "paddock": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://paddock.finance/api/paddock/mcp/mcp"]
+    }
+  }
+}
