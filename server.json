@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.unblinkr/paddock-mcp",
+  "title": "Paddock",
+  "description": "Citable data layer for AI agent commerce on x402: provider analytics, liveness, market trends.",
+  "version": "1.0.0",
+  "websiteUrl": "https://paddock.finance",
+  "repository": {
+    "url": "https://github.com/unblinkr/paddock-mcp",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://paddock.finance/api/mcp/mcp"
+    }
+  ]
+}
+
