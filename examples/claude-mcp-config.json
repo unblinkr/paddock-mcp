@@ -3,7 +3,7 @@
   "mcpServers": {
     "paddock": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://paddock.finance/api/paddock/mcp/mcp"]
+      "args": ["-y", "mcp-remote", "https://paddock.finance/api/mcp/mcp"]
     }
   }
 }

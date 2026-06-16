@@ -33,7 +33,7 @@ The paid tools (`get_niche_gaps`, `get_best_value_provider`, `get_liveness`, `ge
 In Claude Desktop, open **Settings → Connectors → Add custom connector**, then paste the Paddock MCP URL below. Claude will discover the tools automatically and prompt for payment or an API key on the paid tools.
 
 ```
-https://paddock.finance/api/paddock/mcp/mcp
+https://paddock.finance/api/mcp/mcp
 ```
 
 ## Connecting from other MCP clients
@@ -41,7 +41,7 @@ https://paddock.finance/api/paddock/mcp/mcp
 Paddock exposes a standard MCP HTTP transport at the same URL — point any MCP-compatible client at it:
 
 ```
-https://paddock.finance/api/paddock/mcp/mcp
+https://paddock.finance/api/mcp/mcp
 ```
 
 For tool discovery, schemas, and the full route map, see [`openapi.json`](./openapi.json) in this repository (mirrored to `paddock.finance/openapi.json`).
