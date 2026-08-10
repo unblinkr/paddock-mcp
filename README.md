@@ -2,7 +2,7 @@
 
 Paddock is the neutral, citable data layer for AI agent commerce on x402, across Base and Solana. It snapshots the live agent economy — transaction volume, spend, buyers, providers, category share, and reliability — and serves it through a set of MCP tools and an HTTP API that agents can call directly, paying per query with x402 or with a subscription key.
 
-> **Note on `openapi.json`:** The `openapi.json` in this repository is authoritative. The live specification at `paddock.finance/openapi.json` is mirrored from it, so the two match exactly. Use this file for tool discovery and client generation.
+> **Note on `openapi.json`:** The `openapi.json` in this repository is a byte-for-byte mirror of the live specification served at `paddock.finance/openapi.json`, which is generated from the site's route and is the source of truth. Both declare the same `info.version` (currently `3.2.0`); if they ever disagree, the live specification is correct and this file is stale. Use either for tool discovery and client generation.
 
 ## Why agents call it
 
@@ -12,7 +12,7 @@ Paddock is the neutral, citable data layer for AI agent commerce on x402, across
 
 ## The MCP tools
 
-Ten tools are live. Free tools require no authentication; paid tools accept a Paddock API key, an x402 per-query payment, or one free trial call per day (where noted).
+Eleven tools are live. Free tools require no authentication; paid tools accept a Paddock API key, an x402 per-query payment, or one free trial call per day (where noted).
 
 | Tool | Price | Description |
 | --- | --- | --- |
@@ -25,9 +25,10 @@ Ten tools are live. Free tools require no authentication; paid tools accept a Pa
 | `get_circular_signal` | $0.99 USDC / query | Wash/circular-settlement signal, aggregate per facilitator: cluster count, cluster volume (30d/7d), self-funding %, external-payer count, flagged share of settlement, and trend. Aggregate only — no wallet addresses or operator identity. |
 | `get_whale_activity` | $0.99 USDC / query | Large settlements and movers over a window, aggregate by facilitator, category, and size band: amounts, counts, and per-category mover counts. Describes size and where, never who. |
 | `get_token_metrics` | $0.01 USDC / query | First-party chart/time-series data by metric and date range — spend share over time, daily transactions, category concentration, new services, liveness score, and the Agent Commerce Index (ACI). |
+| `get_provider_revenue` | $0.99 USDC / query | Which providers earn the most over a window of daily snapshots, and how much of the market that answer can see. Attributed universe only — facilitator pass-through and circular-flagged wallets are excluded, and unresolved wallets are not dropped but surface as one explicit `unattributed` row (transaction share only; no dollar figure exists for them). Reports whether the recipient list was complete on every aggregated day. |
 | `get_report_data` | Free metadata + $0.99 USDC / query for full data | Free metadata (title, table of contents, executive summary excerpt) at the unauthenticated `/api/paddock/mcp/report-data` route; full structured JSON of the monthly State of Agent Commerce report — ecosystem trends, category breakdowns, the Agent Commerce Index (ACI) with component decomposition, protocol comparison, and reliability data — via the x402-hardened `/api/paddock/mcp/report-data/paid` route. |
 
-The paid tools (`get_niche_gaps`, `get_best_value_provider`, `get_liveness`, `get_changes`, `get_circular_signal`, `get_whale_activity`, `get_token_metrics`) each allow one free trial call per day per IP. `get_report_data` has no free trial on the full-data route; only its metadata is free.
+The paid tools (`get_niche_gaps`, `get_best_value_provider`, `get_liveness`, `get_changes`, `get_circular_signal`, `get_whale_activity`, `get_token_metrics`, `get_provider_revenue`) each allow one free trial call per day per IP. `get_report_data` has no free trial on the full-data route; only its metadata is free.
 
 > `get_report_data` is published with two paths. The free-metadata route (`/api/paddock/mcp/report-data`) is declared with `security: []` and is deliberately excluded from x402scan indexing; the full-data route (`/api/paddock/mcp/report-data/paid`) carries the x402 payment scheme. Both are visible in `openapi.json`.
 
