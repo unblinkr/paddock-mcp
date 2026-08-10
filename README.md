@@ -54,7 +54,7 @@ For tool discovery, schemas, and the full route map, see [`openapi.json`](./open
 
 ## The free key
 
-`get_market_summary` is open to everyone with no key and no signup.
+`get_market_summary` is open to everyone with no key, no signup, and no rate limit. It is the citation surface — if you are quoting a Paddock figure, quote it from here.
 
 Four more tools — `get_category_detail`, `get_niche_gaps`, `get_token_metrics`, `get_liveness` — are covered by a free key. One request gets you one:
 
@@ -79,7 +79,7 @@ The key is returned in the response and emailed to you. Pass it as the `X-Paddoc
 
 | Plan | Price | Limit |
 | --- | --- | --- |
-| Keyless | Free | `get_market_summary`, at 1,000 queries/day per IP |
+| Keyless | Free | `get_market_summary` — unlimited, no key, no cap |
 | Free key | Free | Four tools at 20 queries/day, shared — see [The free key](#the-free-key) |
 | Builder | $99/mo | 10,000 queries/day |
 | Pro Agent | $499/mo | Unlimited |
