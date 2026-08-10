@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-# Paddock — free MCP tools over HTTP.
-# Both tools below are free: no API key, no payment, no headers.
-# Free tier: 1,000 requests/day per IP across the two free tools.
+# Paddock — free-tier MCP tools over HTTP.
+# get_market_summary is keyless. get_category_detail needs a FREE KEY:
+#   curl -X POST https://paddock.finance/api/keys/free \
+#     -H "Content-Type: application/json" -d '{"email":"you@example.com"}'
+# The free key covers get_category_detail, get_niche_gaps, get_token_metrics
+# and get_liveness at 20 calls/UTC-day, shared across all four.
+#
+# Free for development and internal use. Redistribution, resale, or serving
+# Paddock data to your end users requires a commercial license — see
+# paddock.finance/api-access or contact hello@paddock.finance.
 set -euo pipefail
 
 BASE="https://paddock.finance"
@@ -25,9 +32,12 @@ curl -s "$BASE/api/paddock/mcp/summary"
 #   "subscription_url": "https://paddock.finance/api-access"
 # }
 
-# get_category_detail — all services in one category.
+# get_category_detail — all services in one category. FREE KEY REQUIRED.
 # Required query param: name = llm | data | search | infra | content | markets | payments | comms
-curl -s "$BASE/api/paddock/mcp/category?name=llm"
+# Every successful response also carries a `usage` object: used, limit,
+# remaining, resets_at — so you can meter yourself without guessing.
+curl -s -H "X-Paddock-Key: ${PADDOCK_API_KEY:?set PADDOCK_API_KEY to your pk_free_ key}" \
+  "$BASE/api/paddock/mcp/category?name=llm"
 # Expected shape:
 # {
 #   "category": "llm",
