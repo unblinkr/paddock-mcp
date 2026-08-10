@@ -54,6 +54,9 @@ For tool discovery, schemas, and the full route map, see [`openapi.json`](./open
 
 ## The free key
 
+**New here? [Build on Paddock](./BUILDING.md)** is the walkthrough — 60-second start, what each free tool is actually good for, five worked examples, and how to size your usage. The rest of this README is reference.
+
+
 `get_market_summary` is open to everyone with no key, no signup, and no rate limit. It is the citation surface — if you are quoting a Paddock figure, quote it from here.
 
 Four more tools — `get_category_detail`, `get_niche_gaps`, `get_token_metrics`, `get_liveness` — are covered by a free key. One request gets you one:
