@@ -1,9 +1,11 @@
 # Build on Paddock — free API for agent-commerce data
 
-> **Mirror.** This file is generated from `docs/BUILDING.md` in the private
-> `unblinkr/openclaw-news` repo, which is the canonical source and is tested
-> against the live tier config on every change. Edit it there, not here — the
-> same relationship `openapi.json` has.
+> **Canonical source.** This file is mirrored to `BUILDING.md` in the public
+> [`unblinkr/paddock-mcp`](https://github.com/unblinkr/paddock-mcp) repo, which is
+> where builders read it. Edit here, then mirror — the same relationship
+> `openapi.json` has. `free-tier-surface-drift.test.ts` asserts the tool list and
+> the daily limit in this file against `src/lib/paddock/tool-access.ts`, so it
+> cannot drift from what the gate actually enforces.
 
 Paddock is the independent data layer for AI agent commerce. We track x402
 settlement on-chain every day — who's live, what categories are active, where the
@@ -20,8 +22,8 @@ can build without paying anything.
    [paddock.finance/api-access](https://paddock.finance/api-access), or POST it to
    the endpoint below, and a `pk_free_` key comes straight back in the response —
    a copy is emailed to you as well. **Nobody approves it and there is nothing to
-   wait for**; you are not emailing us to ask. That unlocks four more tools,
-   sharing 20 calls/day between them.
+   wait for**; you are not emailing us to ask. That unlocks five more tools,
+   sharing 10 calls/day between them — `verify_before_pay` among them.
 3. **Connect it.** Works as a plain REST API or as an MCP server
    (`https://paddock.finance/api/mcp/mcp`) — drop it into Claude, Cursor, or any
    agent that speaks MCP.
@@ -34,7 +36,7 @@ curl -s https://paddock.finance/api/mcp/summary
 curl -X POST https://paddock.finance/api/keys/free \
   -H "Content-Type: application/json" \
   -d '{"email":"you@example.com"}'
-# => { "ok": true, "key": "pk_free_…", "daily_limit": 20, "tools": [ … ] }
+# => { "ok": true, "key": "pk_free_…", "daily_limit": 10, "tools": [ … ] }
 
 # 3. Use it:
 curl -s -H "X-Paddock-Key: pk_free_YOUR_KEY" \
@@ -52,22 +54,38 @@ Questions: hello@paddock.finance
 
 | Tool | What it answers | Access |
 |---|---|---|
+| `verify_before_pay` | Should your agent pay this endpoint? Probes the target at query time for its 402, checks the decoded contract against what you expected and against the seller's own published config, then adds settlement recency, circular-cluster signal, and a price comparison. Returns `route` true / false / `"inconclusive"` with dated evidence | Free key — 10/day |
 | `get_market_summary` | Market-wide daily overview: total volume, USDC spend, buyer agents, live providers, top categories | Free, no key, no limit |
-| `get_category_detail` | One category's providers, their daily transactions, USDC volume, unique buyers, and reliability scores | Free key — 20/day |
-| `get_niche_gaps` | Categories with high volume but few providers — where demand outruns supply | Free key — 20/day |
-| `get_token_metrics` | Paddock's own daily time series, queryable by metric and date range: `spend_share_over_time`, `daily_transactions`, `category_concentration`, `new_services`, `liveness_score`, and the monthly Agent Commerce Index (`aci`) | Free key — 20/day |
-| `get_liveness` | Whether a service is up, from real probe data — success rate, latency p50/p95, sample count, last-probe time — for **any probed domain**, including ones with no x402 volume | Free key — 20/day |
+| `get_category_detail` | One category's providers, their daily transactions, USDC volume, unique buyers, and reliability scores | Free key — 10/day |
+| `get_niche_gaps` | Categories with high volume but few providers — where demand outruns supply | Free key — 10/day |
+| `get_token_metrics` | Paddock's own daily time series, queryable by metric and date range: `spend_share_over_time`, `daily_transactions`, `category_concentration`, `new_services`, `liveness_score`, and the monthly Agent Commerce Index (`aci`) | Free key — 10/day |
+| `get_liveness` | Whether a service is up, from real probe data — success rate, latency p50/p95, sample count, last-probe time — for **any probed domain**, including ones with no x402 volume | Free key — 10/day |
 
-The four keyed tools share one 20-calls/day budget. `get_market_summary` doesn't
+The five keyed tools share one 10-calls/day budget. `get_market_summary` doesn't
 count against it.
 
 **Two things to know about the data before you build on it.**
 
-*It's a daily series, not a live feed.* Every tool above reads the most recent
-nightly snapshot (the writer runs at 23:30 UTC). `get_liveness` returns
-TrustBench's probe results as of that snapshot — real probes, aggregated over 7
-days, but not re-probed when you call. Polling any of these tools more than once
-a day returns the same numbers. Build daily cadence, not polling loops.
+*It's a daily series, not a live feed — with exactly one exception.* Every tool
+above reads the most recent nightly snapshot (the writer runs at 23:30 UTC).
+`get_liveness` returns TrustBench's probe results as of that snapshot — real
+probes, aggregated over 7 days, but not re-probed when you call. Polling any of
+those tools more than once a day returns the same numbers. Build daily cadence,
+not polling loops.
+
+`verify_before_pay` is the exception, and it is the reason it exists: it sends an
+unpaid request to the endpoint you name at the moment you call, so its liveness
+and contract answers are as of `checked_at` and nothing else in the response is.
+The historical parts of that same response — settlement recency, the circular
+signal — are still snapshot-dated, and each block says which it is. If the probe
+can't read a 402, `route` comes back `"inconclusive"` no matter how good the
+history looks: test it with `route === true`, because the string `"inconclusive"`
+is truthy and it is the one case where you must not pay on our say-so.
+
+*There is no success-rate field on `verify_before_pay`, on purpose.* Paddock
+observes settlements, not attempted calls — a payment that failed leaves no row
+in our record, so any rate computed from it could only ever be 100%. You get
+recency and frequency instead, which are things we can actually see.
 
 *`get_token_metrics` is our series, not token prices.* It serves the same
 first-party chart data the site renders — transaction and concentration trends,
@@ -120,8 +138,8 @@ guess how much quota is left:
   "tier": "free_key",
   "usage": {
     "used": 3,
-    "limit": 20,
-    "remaining": 17,
+    "limit": 10,
+    "remaining": 7,
     "resets_at": "2026-08-12T00:00:00.000Z"
   }
 }
@@ -135,7 +153,7 @@ when you're back and what the paid paths cost:
   "tool": "get_liveness",
   "status": "rate_limited",
   "error": "free_tier_daily_limit_reached",
-  "usage": { "used": 21, "limit": 20, "remaining": 0,
+  "usage": { "used": 11, "limit": 10, "remaining": 0,
              "resets_at": "2026-08-12T00:00:00.000Z" },
   "upgrade": {
     "pay_per_query": "Settle the tool's USDC price via x402 at call time — no subscription, no key.",
