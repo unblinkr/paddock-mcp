@@ -90,6 +90,11 @@ Handler steps:
    | `aws_customer_identifier` | `CustomerIdentifier` — empty for us; stored only so a legacy row and a new row have the same shape |
    | `status` | `pending` until the agreement-created event arrives, then `active` |
 
+   **Holder identity is `CustomerAWSAccountId` + `LicenseArn`**, channel
+   `aws-marketplace`. `LicenseArn` alone is the uniqueness constraint; the
+   account id is carried for reporting and for answering "what does this buyer
+   have with us". Confirmed decision, 2026-09-14 — see finding #5.
+
 5. **Show the key exactly once**, with the same quickstart links the
    design-partner emails use.
 
@@ -267,6 +272,66 @@ route, exactly like every other tier. Differences:
 - **Every call is logged for metering**, with the `LicenseArn` and the resolved
   dimension, at the point the call is settled successfully.
 - A `revoked` key fails the resolver like any other revoked key.
+
+---
+
+## Operations
+
+Everything in this section is a thing that costs money when it goes unnoticed.
+All of it is **alert-worthy, not log-worthy** — it needs to reach a human, not a
+dashboard nobody opens.
+
+### Deadlines that lose money
+
+These are hard AWS limits. Past them the revenue is simply unbillable; there is
+no appeal and no retroactive submission.
+
+| Deadline | Limit | What the metering job must do |
+| --- | --- | --- |
+| **Record expiry** | Usage records are rejected **24 hours or more** after the event | Escalate any ledger row still `pending` at **20 hours**. Four hours of headroom to fix a credential or a bug by hand. |
+| **Month-end close** | Previous month's records accepted only until **06:00 UTC on the 1st**, then `TimestampOutOfBoundsException` | On the 1st, run the aggregation early and treat any `pending` row for the prior month as **critical** from 03:00 UTC. |
+| **Deprovision flush** | **One hour** from `License Deprovisioned - Manufacturer` | Flush that `LicenseArn` immediately on the event — out of band, not at the next hourly tick. Alert if the flush fails; there is no second chance. |
+
+Design consequence: the metering job must never treat "nothing reported" as
+success. A tick that reports zero rows when the call log has billable calls in
+it is a failure, and should say so.
+
+### Warning events (pay-as-you-go only)
+
+Our product is usage-based, so we receive AWS's spend-verification events. These
+are the earliest signal that revenue we are accruing may not collect.
+
+| Event | Severity | Response |
+| --- | --- | --- |
+| `Spend Threshold Vet Failed` | **Alert** | AWS could not verify the buyer's card. Keep serving — AWS retries — but flag the account. If it repeats, the receivable is at risk and someone should look at the exposure. |
+| `Purchase Agreement Advisory Issued - Manufacturer` | **Alert** | AWS suspects buyer account closure, compromise, abuse, or fraud. **Do not auto-revoke** — AWS has not ended the agreement. Flag for human review. |
+| `Spend Threshold Reached` | Record | Informational. AWS is starting a verification. |
+| `Spend Threshold Vet Succeeded` | Record | Informational. Clears a prior `Reached`. |
+| `Purchase Agreement Advisory Resolved - Manufacturer` | Record | Clears the advisory flag. |
+
+### Alert routing
+
+| Condition | Severity |
+| --- | --- |
+| Ledger row `pending` at 20h | Critical |
+| Prior-month row `pending` after 03:00 UTC on the 1st | Critical |
+| Deprovision flush failed | Critical |
+| `PADDOCK_AWS_*` credentials absent in production | Critical |
+| Metering job did not run for a scheduled hour | High |
+| `Spend Threshold Vet Failed` | High |
+| `Purchase Agreement Advisory Issued` | High |
+| `BatchMeterUsage` returned `UnprocessedRecords` two ticks running | High |
+| Any `rejected` ledger row | High — it is unbillable revenue; find out why |
+| SQS queue depth non-zero for over an hour | Medium — the consumer is stuck |
+
+### Routine checks
+
+- **Weekly:** ledger total per dimension vs. the Marketplace Management Portal's
+  usage report. They should match exactly. A drift is either a bug or a dispute
+  waiting to happen.
+- **Monthly, after the 1st:** confirm nothing was lost to the 06:00 UTC cutoff.
+- **On any deploy touching metering:** confirm the next hourly tick produced
+  ledger rows, rather than assuming it did.
 
 ---
 
@@ -578,5 +643,21 @@ existing key infrastructure:
 | Resolver change | `aws_metered` bypasses the daily cap, logs every settled call with its dimension |
 | Tests | Token exchange, dimension mapping, idempotent reuse, revoke-on-unsubscribe, no-double-reporting |
 
-The one design decision to carry across, because it is easy to get wrong: key
-identity is **`LicenseArn`**, not the AWS account. See finding #5.
+### Confirmed decisions to carry into the build (2026-09-14)
+
+1. **Key grain is per-`LicenseArn`.** A second concurrent agreement is a new key
+   with its own holder record. Holder identity is `CustomerAWSAccountId` +
+   `LicenseArn`, channel `aws-marketplace`. Easy to get wrong; see finding #5.
+2. **The EventBridge event table above replaces the SNS instruction** in the
+   original build spec. The SNS topic is not used.
+3. **`BatchMeterUsage` carries `LicenseArn` only, never `ProductCode`.** Sending
+   both for the same customer in the same hour double-bills.
+4. **Ledger uniqueness is `(license_arn, dimension, period_start)`.** That
+   constraint is the no-double-reporting guarantee.
+5. **The [Operations](#operations) section is part of the contract**, not
+   commentary — the money-losing deadlines and the PAYG warning events belong in
+   the metering job's design, not just in a runbook.
+
+These two documents, plus
+[`aws-integration-findings.md`](./aws-integration-findings.md), are the contract
+for the build.

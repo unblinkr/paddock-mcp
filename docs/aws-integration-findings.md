@@ -99,6 +99,11 @@ agreement* from the same AWS account is a genuinely new key, and that is not a
 fulfillment page should say so plainly when it happens, so the buyer is not
 confused by receiving a second key.
 
+> **Decision (2026-09-14, accepted):** key grain is per-`LicenseArn`. A second
+> concurrent agreement is a new key with its own holder record. Holder identity
+> is `CustomerAWSAccountId` + `LicenseArn`, channel `aws-marketplace`. This
+> supersedes the "one key per customer" wording in the original build spec.
+
 ## 6. Events the spec does not mention but a usage-based product receives
 
 Beyond subscribe/unsubscribe we are sent, and should at minimum record:
