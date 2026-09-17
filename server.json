@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.unblinkr/paddock-mcp",
   "title": "Paddock",
-  "description": "Citable data layer for AI agent commerce on x402: provider analytics, liveness, market trends.",
+  "description": "Pre-payment verification for AI agents. Agent payments have no chargeback. Paddock is pre-payment verification for AI agents.",
   "version": "1.0.0",
   "websiteUrl": "https://paddock.finance",
   "repository": {

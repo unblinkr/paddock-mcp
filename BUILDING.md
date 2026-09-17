@@ -7,9 +7,9 @@
 > the daily limit in this file against `src/lib/paddock/tool-access.ts`, so it
 > cannot drift from what the gate actually enforces.
 
-Paddock is the independent data layer for AI agent commerce. We track x402
-settlement on-chain every day — who's live, what categories are active, where the
-volume goes — and publish it through a free API and MCP server. This is what you
+Agent payments have no chargeback. Paddock is pre-payment verification for AI agents. We track x402
+settlement on-chain every day, who's live, what categories are active, where the
+volume goes, and publish it through a free API and MCP server. This is what you
 can build without paying anything.
 
 ## Get started in 60 seconds
@@ -59,7 +59,7 @@ Questions: hello@paddock.finance
 | `get_category_detail` | One category's providers, their daily transactions, USDC volume, unique buyers, and reliability scores | Free key — 10/day |
 | `get_niche_gaps` | Categories with high volume but few providers — where demand outruns supply | Free key — 10/day |
 | `get_token_metrics` | Paddock's own daily time series, queryable by metric and date range: `spend_share_over_time`, `daily_transactions`, `category_concentration`, `new_services`, `liveness_score`, and the monthly Agent Commerce Index (`aci`) | Free key — 10/day |
-| `get_liveness` | Whether a service is up, from real probe data — success rate, latency p50/p95, sample count, last-probe time — for **any probed domain**, including ones with no x402 volume | Free key — 10/day |
+| `get_liveness` | Whether a service is up, from real probe data: probe success rate, latency p50/p95, sample count, last-probe time, for **any probed domain**, including ones with no x402 volume | Free key — 10/day |
 
 The five keyed tools share one 10-calls/day budget. `get_market_summary` doesn't
 count against it.
