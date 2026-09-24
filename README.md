@@ -38,6 +38,14 @@ The paid tools (`verify_before_pay`, `get_niche_gaps`, `get_best_value_provider`
 
 > `get_report_data` is published with two paths. The free-metadata route (`/api/paddock/mcp/report-data`) is declared with `security: []` and is deliberately excluded from x402scan indexing; the full-data route (`/api/paddock/mcp/report-data/paid`) carries the x402 payment scheme. Both are visible in `openapi.json`.
 
+## Signed attestations
+
+Paddock can emit a signed attestation for any pre-payment check: a portable JSON record carrying the observed payment terms, the settlement history it was checked against, the observation window, and the verdict, signed Ed25519 over an RFC 8785 canonical form. The signing key is published at a well-known path, and records verify standalone with no API access and no trust in Paddock. This is the attested-evidence format proposed for the x402 dispute-resolution extension.
+
+- The public key path: `/.well-known/paddock-attestation-key`
+- Verify it yourself: fetch the record, canonicalize per RFC 8785, check the Ed25519 signature against the published key.
+- Live example: [https://paddock.finance/a/mFxHpIcBGHR0NsmkpT8rHb0wvX_8tIr3K0xOl_4W4UY](https://paddock.finance/a/mFxHpIcBGHR0NsmkpT8rHb0wvX_8tIr3K0xOl_4W4UY)
+
 ## Connecting from Claude Desktop
 
 In Claude Desktop, open **Settings → Connectors → Add custom connector**, then paste the Paddock MCP URL below. Claude discovers the tools automatically.
