@@ -1,8 +1,8 @@
 # Paddock
 
-Agent payments have no chargeback. Paddock is pre-payment verification for AI agents. It checks that an x402 API is real, live, and fairly priced before your agent pays it, and it measures what AI agents actually pay each other on x402 across Base and Solana.
+Agent payments have no chargeback. Paddock is pre-payment verification for AI agents.
 
-Before a bank transfer, Plaid confirms the account is real and belongs to who you think. Before an agent pays an API, nobody does. Paddock does.
+It checks that an x402 API is real, live, and fairly priced before your agent pays it, and it measures what AI agents actually pay each other on x402 across Base and Solana.
 
 Paddock snapshots the live agent economy, transaction volume, spend, buyers, providers, category share, and reliability, and serves it through a set of MCP tools and an HTTP API that agents can call directly, paying per query with x402 or with a subscription key.
 

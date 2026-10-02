@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.unblinkr/paddock-mcp",
+  "name": "finance.paddock/paddock",
   "title": "Paddock",
-  "description": "Pre-payment verification for AI agents. Agent payments have no chargeback. Paddock is pre-payment verification for AI agents.",
-  "version": "1.0.0",
+  "description": "Pre-payment verification for AI agents.",
+  "version": "3.6.0",
   "websiteUrl": "https://paddock.finance",
   "repository": {
     "url": "https://github.com/unblinkr/paddock-mcp",
@@ -16,4 +16,3 @@
     }
   ]
 }
-
